@@ -18,7 +18,8 @@ Kp = 1;      % controller P-gain
 Td = 10;     % controller derivative time
 
 % initial states:  x = [ u v r x y psi delta ]' 
-x = zeros(7,1);   
+%x = zeros(7,1);  
+x = [0.01;0;0;0;0;0;0];
 
 % --- MAIN LOOP ---
 N = round(t_f/h);               % number of samples
