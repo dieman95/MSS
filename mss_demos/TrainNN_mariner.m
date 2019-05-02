@@ -5,10 +5,10 @@ clc;clear
 %opt = simset('solver','ode4','FixedStep',0.02);
 
 %% Generate training data
-s = 200; % number of simulation I want to record
+s = 400; % number of simulation I want to record
 for i=1:s
     %rng(1); %set the seed for reproducible results
-    psi_ref = 0.18*rand - 0.09 %different psi_ref for each simulation
+    psi_ref = 0.18*rand - 0.09; %different psi_ref for each simulation
     %Same initial conditions for every simulation
     % [T,X] = sim('Mountain_car',[0 15],opt); %simulate system and record data
     [T,X] = sim('Lcontainer_sim',[0 200]); %simulate system and record data
@@ -30,7 +30,7 @@ for i=1:s
 end
 
 clearvars -except data_plant data_nn data_tr s;
-%save('MC_data','dataf'); 
+save('data_Lcontainer','data_plant', 'data_nn', 'data_tr'); 
 
 %% Train Neural Network controller with only relus and linear function
 % % Load data 
@@ -85,7 +85,7 @@ net_p.layers{1}.transferFcn = 'poslin'; %poslin = relu
 net_p.layers{2}.transferFcn = 'poslin'; %poslin = relu
 net_p.layers{3}.transferFcn = 'purelin'; % purelin = linear
 net_p.initFcn = 'initlay';
-net_p.trainFcn = 'trainbr'; %Bayesian regularization
+net_p.trainFcn = 'trainlm'; %Bayesian regularization
 net_p.layers{1}.initFcn = 'initnw';
 net_p.layers{2}.initFcn = 'initnw';
 net_p.layers{3}.initFcn = 'initnw';
@@ -94,7 +94,7 @@ net_p.layers{3}.initFcn = 'initnw';
 %Store the output simulations
 % y1 = net_p(in);
 net_p = init(net_p);
-net_p = train(net_p,in,out);
+net_p = train(net_p,in,out,'useGPU','no','showResources','yes'); %change to no when trining at lab
 % y2 = net_p(in);
 % out = cell2mat(out);
 
