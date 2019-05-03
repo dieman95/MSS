@@ -5,13 +5,13 @@ clc;clear
 %opt = simset('solver','ode4','FixedStep',0.02);
 
 %% Generate training data
-s = 120; % number of simulation I want to record
+s = 25; % number of simulation I want to record
 for i=1:s
     %rng(1); %set the seed for reproducible results
     psi_ref = 0.18*rand - 0.09; %different psi_ref for each simulation
     %Same initial conditions for every simulation
     % [T,X] = sim('Mountain_car',[0 15],opt); %simulate system and record data
-    [T,X] = sim('Lcontainer_sim',[0 350]); %simulate system and record data
+    [T,X] = sim('Lcontainer_sim',[0 200]); %simulate system and record data
     % Create data object for each iteration
     d_plant = iddata(xdot,[x_in ui_in],0.1);
     d_nn = iddata(ui_out,[psi_ref_out psi_out r_out],0.1);
@@ -30,7 +30,7 @@ for i=1:s
 end
 
 clearvars -except data_plant data_nn data_tr s;
-save('/home/musaup/Documents/MATLAB/diego/MSSdata/data_Lcontainer','data_plant', 'data_nn', 'data_tr'); %Lab GPU
+save('/home/musaup/Documents/MATLAB/diego/MSSdata/data_Lcontainer','data_plant', 'data_nn', 'data_tr'); 
 
 %% Train Neural Network controller with only relus and linear function
 % % Load data 
@@ -86,9 +86,8 @@ net_p.layers{2}.transferFcn = 'poslin'; %poslin = relu
 net_p.layers{3}.transferFcn = 'purelin'; % purelin = linear
 net_p.initFcn = 'initlay';
 net_p.trainFcn = 'trainlm'; %Bayesian regularization
-net_p.trainParam.epochs = 10000;
+net_p.trainParam.epochs = 5000;
 net_p.trainParam.max_fail = 10;
-net_p.trainParam.goal = 0.001;
 net_p.layers{1}.initFcn = 'initnw';
 net_p.layers{2}.initFcn = 'initnw';
 net_p.layers{3}.initFcn = 'initnw';

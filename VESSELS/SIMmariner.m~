@@ -105,7 +105,7 @@ net.layers{3}.transferFcn = 'purelin'; %poslin = relu
 %net.layers{5}.transferFcn = 'purelin'; % purelin = linear
 net.trainParam.epochs = 10000;
 net.trainParam.max_fail = 10;
-net.trainParam.mu_max = 10e20;
+net.trainParam.mu_max = eps;
 net.trainParam.goal = 0.0000000001;
 net.performFcn = 'sse';%help nnperformance to see list of options
 
@@ -122,7 +122,7 @@ out_train = {data(8:end,1:10000)};
 in_test = {data(1:7,50000:55000)};
 out_test = {data(8:end,50000:55000)};
 
-net = train(net,in_train,out_train,'useGPU','yes','useParallel','no','showResources','yes');
+net = train(net,in_train,out_train,'useGPU','yes','useParallel','yes','showResources','yes');
 outnet = net(in_test);
 perf = perform(net,out_test,outnet)
 
