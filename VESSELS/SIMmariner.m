@@ -117,12 +117,12 @@ datatr = [xin; U; X; Y; N];
 idx = randperm(n);
 data = datatr;
 data(1,idx) = datatr(1,:);
-in_train = {data(1:7,1:10000)};
-out_train = {data(8:end,1:10000)};
-in_test = {data(1:7,50000:55000)};
-out_test = {data(8:end,50000:55000)};
+in_train = {data(1:7,1:300000)};
+out_train = {data(8:end,1:300000)};
+in_test = {data(1:7,500000:505000)};
+out_test = {data(8:end,500000:505000)};
 
-net = train(net,in_train,out_train,'useGPU','yes','useParallel','no','showResources','yes');
+net = train(net,in_train,out_train,'useGPU','no','useParallel','yes','showResources','yes');
 outnet = net(in_test);
 perf = perform(net,out_test,outnet)
 
