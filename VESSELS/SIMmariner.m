@@ -1,3 +1,4 @@
+clc;clear
 echo on
 % SIMmariner  User editable script for simulation of the 
 %             mariner class vessel under feedback control
@@ -49,18 +50,18 @@ for j=1:sims
     end
     % time-series
     t(:,:,j)      = xout(:,1);
-    u(:,:,j)      = xout(:,2); 
-    v(:,:,j)      = xout(:,3);
-    ro(:,:,j)     = xout(:,4);   
-    xo(:,:,j)     = xout(:,5);
-    y(:,:,j)      = xout(:,6);
-    psio(:,:,j)   = xout(:,7);
-    deltao(:,:,j) = xout(:,8);
-    Uo(:,:,j)     = xout(:,9);
-    Xo(:,:,j)     = xout(:,10);
-    Yo(:,:,j)     = xout(:,11);
-    No(:,:,j)     = xout(:,12);
-    xino(j,:,:)   = xin;
+    u(:,:,j)      = (xout(:,2) - min(xout(:,2)))/(max(xout(:,2))-min(xout(:,2))); %Normalize data between 0 and 1
+    v(:,:,j)      = (xout(:,3) - min(xout(:,3)))/(max(xout(:,3))-min(xout(:,3)));
+    ro(:,:,j)     = (xout(:,4) - min(xout(:,4)))/(max(xout(:,4))-min(xout(:,4)));   
+    xo(:,:,j)     = (xout(:,5) - min(xout(:,5)))/(max(xout(:,5))-min(xout(:,5)));
+    y(:,:,j)      = (xout(:,6) - min(xout(:,6)))/(max(xout(:,6))-min(xout(:,6)));
+    psio(:,:,j)   = (xout(:,7) - min(xout(:,7)))/(max(xout(:,7))-min(xout(:,7)));
+    deltao(:,:,j) = (xout(:,8) - min(xout(:,8)))/(max(xout(:,8))-min(xout(:,8)));
+    Uo(:,:,j)     = (xout(:,9) - min(xout(:,9)))/(max(xout(:,9))-min(xout(:,9)));
+    Xo(:,:,j)     = (xout(:,10) - min(xout(:,10)))/(max(xout(:,10))-min(xout(:,10)));
+    Yo(:,:,j)     = (xout(:,11) - min(xout(:,11)))/(max(xout(:,11))-min(xout(:,11)));
+    No(:,:,j)     = (xout(:,12) - min(xout(:,12)))/(max(xout(:,12))-min(xout(:,12)));
+    xino(:,j,:)   = (xin'-min(xin)')./(max(xin)'-min(xin)');
     
 end
 
@@ -91,23 +92,23 @@ xin   = reshape(xino,7,(n+1)*sims);
 % subplot(224),plot(t,delta),xlabel('time (s)'),title('rudder angle \delta (deg)'),grid
 
 %% Train NN to predict X, Y, and N from inputs and states
-layers = [24 24];
+layers = [24 48 24];
 net = feedforwardnet(layers,'trainlm');
-% net.inputs{1}.processFcns = {};
+net.inputs{1}.processFcns = {};
 % net.outputs{length(layers)+1}.processFcns = {};
 net.inputs{1}.size = 7;
 net.layers{length(layers)+1}.size = 4;
 
 net.layers{1}.transferFcn = 'poslin'; %poslin = relu
 net.layers{2}.transferFcn = 'poslin'; %poslin = relu
-net.layers{3}.transferFcn = 'purelin'; %poslin = relu
-% net.layers{4}.transferFcn = 'purelin'; %poslin = relu
+net.layers{3}.transferFcn = 'tansig'; %poslin = relu
+%net.layers{4}.transferFcn = 'purelin'; %poslin = relu
 %net.layers{5}.transferFcn = 'purelin'; % purelin = linear
 net.trainParam.epochs = 10000;
 net.trainParam.max_fail = 10;
 net.trainParam.mu_max = 10e20;
 net.trainParam.goal = 0.0000000001;
-net.performFcn = 'sse';%help nnperformance to see list of options
+net.performFcn = 'mse';%help nnperformance to see list of options
 
 %Cannot train with non two-dimensional data, either create iddata objects,
 %or simply place one simulation after another and randomly sample them (all
@@ -119,12 +120,12 @@ data = datatr;
 data(1,idx) = datatr(1,:);
 in_train = {data(1:7,1:300000)};
 out_train = {data(8:end,1:300000)};
-in_test = {data(1:7,500000:505000)};
-out_test = {data(8:end,500000:505000)};
+% in_test = {data(1:7,500000:505000)};
+% out_test = {data(8:end,500000:505000)};
 
-net = train(net,in_train,out_train,'useGPU','no','useParallel','yes','showResources','yes');
-outnet = net(in_test);
-perf = perform(net,out_test,outnet)
+net = train(net,in_train,out_train,'useGPU','yes','useParallel','no','showResources','yes');
+% outnet = net(in_test);
+% perf = perform(net,out_test,outnet)
 
 % view(net);
 % gensim(net);
