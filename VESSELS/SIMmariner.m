@@ -98,26 +98,17 @@ error = reshape(erro,1,(n+1)*sims);
 cont_out = reshape(conto,1,(n+1)*sims);
 xdot  = reshape(xderio,7,(n+1)*sims);
 
-% % plots
-% figure(1)
-% plot(y,x),grid,axis('equal'),xlabel('East'),ylabel('North'),title('Ship position')
-% 
-% figure(2)
-% subplot(221),plot(t,r),xlabel('time (s)'),title('yaw rate r (deg/s)'),grid
-% subplot(222),plot(t,U),xlabel('time (s)'),title('speed U (m/s)'),grid
-% subplot(223),plot(t,psi),xlabel('time (s)'),title('yaw angle \psi (deg)'),grid
-% subplot(224),plot(t,delta),xlabel('time (s)'),title('rudder angle \delta (deg)'),grid
 
 % Shuffle the data before training any NN
-% datatr = [xin; U; X; Y; N; u; v; r; x; y; psi; delta; psi_ref; error; cont_out; xdot];
-% [m,n] = size(datatr);
-% idx = randperm(n);
-% data = datatr;
-% for i = 1:(size(datatr,1))
-%     data(i,idx) = data(i,:);
-% end
+datatr = [xin; U; X; Y; N; u; v; r; x; y; psi; delta; psi_ref; error; cont_out; xdot];
+[m,n] = size(datatr);
+idx = randperm(n);
+data = datatr;
+for i = 1:(size(datatr,1))
+    data(i,idx) = data(i,:);
+end
 
-% %% Train NN to predict X, Y, and N from inputs and states
+%% Train NN to predict X, Y, and N from inputs and states
 % layers = [24 48 24];
 % net = feedforwardnet(layers,'trainlm');
 % net.inputs{1}.processFcns = {};
@@ -150,7 +141,7 @@ xdot  = reshape(xderio,7,(n+1)*sims);
 % view(net);
 % gensim(net);
 
-% %% Train NN controller to substitute PID
+%% Train NN controller to substitute PID
 % layers = [10 10];
 % netc = feedforwardnet(layers,'trainlm');
 % netc.inputs{1}.processFcns = {};
@@ -183,7 +174,7 @@ xdot  = reshape(xderio,7,(n+1)*sims);
 % outnet3 = netc(in_test3);
 % perf = perform(netc,out_test3,outnet3)
 
-% %% Train a NN to substitute the explicit plant (Compute xdot from previous state + input)
+%% Train a NN to substitute the explicit plant (Compute xdot from previous state + input)
 % layers = [24 48 48 48 24];
 % net = feedforwardnet(layers,'trainbr');
 % net.inputs{1}.processFcns = {};
