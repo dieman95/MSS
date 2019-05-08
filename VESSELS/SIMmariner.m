@@ -27,6 +27,7 @@ xin = zeros(n+1,7);  % memory allocation
 pref = zeros(n+1,1); % memory allocation
 err = zeros(n+1,1); % memory allocation
 cont_out = zeros(n+1,1); % memory allocation
+xderi = zeros(n+1,7);  % memory allocation
 
 sims = 100;
 for j=1:sims
@@ -74,8 +75,8 @@ for j=1:sims
     xino(:,j,:)   = (xin'-min(xin)')./(max(xin)'-min(xin)');
     prefo(:,:,j)  = pref;
     erro(:,:,j)   = err;
-    conto(:,:,j)  = (cont_out'-min(cont_out)')/(max(cont_out)'-min(cont_out)');
-    xderio(:,j,:) = xderi';
+    conto(:,:,j)  = cont_out';%(cont_out'-min(cont_out)')/(max(cont_out)'-min(cont_out)');
+    xderio(:,j,:) = xderi';%(xderi'-min(xderi)')./(max(xderi)'-min(xderi)');
 end
 
 %Reshape data
@@ -108,13 +109,13 @@ xdot  = reshape(xderio,7,(n+1)*sims);
 % subplot(224),plot(t,delta),xlabel('time (s)'),title('rudder angle \delta (deg)'),grid
 
 % Shuffle the data before training any NN
-datatr = [xin; U; X; Y; N; u; v; r; x; y; psi; delta; psi_ref; error; cont_out; xdot];
-[m,n] = size(datatr);
-idx = randperm(n);
-data = datatr;
-for i = 1:(size(datatr,1))
-    data(i,idx) = data(i,:);
-end
+% datatr = [xin; U; X; Y; N; u; v; r; x; y; psi; delta; psi_ref; error; cont_out; xdot];
+% [m,n] = size(datatr);
+% idx = randperm(n);
+% data = datatr;
+% for i = 1:(size(datatr,1))
+%     data(i,idx) = data(i,:);
+% end
 
 % %% Train NN to predict X, Y, and N from inputs and states
 % layers = [24 48 24];
@@ -182,30 +183,30 @@ end
 % outnet3 = netc(in_test3);
 % perf = perform(netc,out_test3,outnet3)
 
-%% Train a NN to substitute the explicit plant (Compute xdot from previous state + input)
-layers = [24 48 48 48 24];
-net = feedforwardnet(layers,'trainbr');
-net.inputs{1}.processFcns = {};
-net.outputs{length(layers)+1}.processFcns = {};
-net.inputs{1}.size = 8;
-net.layers{length(layers)+1}.size = 7;
-net.layers{1}.transferFcn = 'poslin'; %poslin = relu
-net.layers{2}.transferFcn = 'poslin'; %poslin = relu
-net.layers{3}.transferFcn = 'poslin'; %poslin = relu
-net.layers{4}.transferFcn = 'poslin'; %poslin = relu
-net.layers{5}.transferFcn = 'purelin'; % purelin = linear
-net.trainParam.epochs = 10000;
-net.trainParam.max_fail = 10;
-net.trainParam.mu_max = 10e20;
-net.trainParam.goal = 0.0000000001;
-net.performFcn = 'mse';%help nnperformance to see list of options
-net.trainParam.min_grad = 1e-11;
-% datatr = [xin(7-dim); U; X; Y; N; u, v, r, x, y, psi, delta, psi_ref; error; cont_out; xdot];
-in = {[data(1:7,1:200000); data(21,1:200000)]};
-out = {data(22:end,1:200000)};
-in_test = {[data(1:7,end-10000:end); data(21,end-10000:end)]};
-out_test = {data(22:end,end-10000:end)};
-
-net = train(net,in,out,'useGPU','yes','useParallel','no','showResources','yes');
-outnet = net(in_test);
-perf = perform(net,out_test,outnet)
+% %% Train a NN to substitute the explicit plant (Compute xdot from previous state + input)
+% layers = [24 48 48 48 24];
+% net = feedforwardnet(layers,'trainbr');
+% net.inputs{1}.processFcns = {};
+% net.outputs{length(layers)+1}.processFcns = {};
+% net.inputs{1}.size = 8;
+% net.layers{length(layers)+1}.size = 6;
+% net.layers{1}.transferFcn = 'poslin'; %poslin = relu
+% net.layers{2}.transferFcn = 'poslin'; %poslin = relu
+% net.layers{3}.transferFcn = 'poslin'; %poslin = relu
+% net.layers{4}.transferFcn = 'poslin'; %poslin = relu
+% net.layers{5}.transferFcn = 'purelin'; % purelin = linear
+% net.trainParam.epochs = 10000;
+% net.trainParam.max_fail = 10;
+% net.trainParam.mu_max = 10e20;
+% net.trainParam.goal = 0.0000000001;
+% net.performFcn = 'mse';%help nnperformance to see list of options
+% net.trainParam.min_grad = 1e-11;
+% % datatr = [xin(7-dim); U; X; Y; N; u, v, r, x, y, psi, delta, psi_ref; error; cont_out; xdot];
+% in = {[data(1:7,1:200000); data(21,1:200000)]};
+% out = {data(22:end-1,1:200000)};
+% in_test = {[data(1:7,end-10000:end); data(21,end-10000:end)]};
+% out_test = {data(22:end-1,end-10000:end)};
+% 
+% net = train(net,in,out,'useGPU','yes','useParallel','no','showResources','yes');
+% outnet = net(in_test);
+% perf = perform(net,out_test,outnet)
