@@ -15,7 +15,6 @@ function xdot = Mariner(x,ui)
 % 
 % ui    = commanded rudder angle (rad)
 % 
-% Optional input nominal speed (Changed to constant value)
 % U0    = nominal speed (optionally). Default value is U0 = 7.7175 m/s = 15 knots.
 %
 % Reference: M.S. Chislett and J. Stroem-Tejsen (1965). Planar Motion Mechanism Tests 
@@ -32,9 +31,7 @@ function xdot = Mariner(x,ui)
 % Check of input and state dimensions
 if (length(x)  ~= 7),error('x-vector must have dimension 7 !'); end
 if (length(ui) ~= 1),error('ui must be a scalar input!'); end
-
-% Nominal speed
-U0 = 7.7175;
+if nargin==2, U0 = 7.7175; end
 
 % Normalization variables
 L = 160.93;

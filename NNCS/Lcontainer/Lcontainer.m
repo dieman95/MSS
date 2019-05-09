@@ -1,4 +1,4 @@
-function [xdot,U] = Lcontainer(x,ui,U0)
+function xdot = LContainer(x,ui)
 % [xdot,U] = Lcontainer(x,ui,U0) returns the speed U in m/s (optionally) and the 
 % time derivative of the state vector: x = [ u v r x y psi p phi delta ]'  using the
 % the LINEARIZED model corresponding to the nonlinear model container.m. 
@@ -15,8 +15,10 @@ function [xdot,U] = Lcontainer(x,ui,U0)
 %
 % The inputs are :
 %
-% Uo     = service speed (optinally. Default speed U0 = 7 m/s
 % ui     = commanded rudder angle   (rad)
+%
+% Optional input nominal speed (Changed to constant value)
+% Uo     = service speed (optinally. Default speed U0 = 7 m/s
 %
 % Reference:  Son og Nomoto (1982). On the Coupled Motion of Steering and 
 %             Rolling of a High Speed Container Ship, Naval Architect of Ocean Engineering,
@@ -29,9 +31,8 @@ function [xdot,U] = Lcontainer(x,ui,U0)
 % Check of input and state dimensions
 if (length(x) ~= 9),error('x-vector must have dimension 9 !');end
 
-% Check of service speed
-if nargin==2, U0=7.0; end
-if U0 <=0,error('The ship must have speed greater than zero');end
+% Nominal speed
+U0  = 7; 
 
 % Normalization variables
 rho = 1025;                 % water density (kg/m^3)
