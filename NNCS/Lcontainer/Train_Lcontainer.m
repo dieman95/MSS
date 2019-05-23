@@ -30,7 +30,7 @@ for i=1:s
 end
 
 clearvars -except data_plant data_nn data_tr s;
-save('/home/musaup/Documents/MATLAB/diego/MSSdata/data_Lcontainer','data_plant', 'data_nn', 'data_tr'); %Lab GPU
+%save('/home/musaup/Documents/MATLAB/diego/MSSdata/data_Lcontainer','data_plant', 'data_nn', 'data_tr'); %Lab GPU
 
 %% Train Neural Network controller with only relus and linear function
 % % Load data 
