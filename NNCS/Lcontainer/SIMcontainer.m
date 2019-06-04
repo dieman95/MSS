@@ -10,7 +10,7 @@ clc;clear
 
 disp('Simulating container.m and Lcontainer.m under PD-control with psi_ref=[-15 to 15] (deg) ...')
 
-t_f = 600;   % final simulation time (sec)
+t_f = 400;   % final simulation time (sec)
 h   = 0.1;   % sample time (sec)
 
 Kp = 1;      % controller P-gain
@@ -24,7 +24,7 @@ N = round(t_f/h);               % number of samples
 xout = zeros(N+1,length(x)+1);  % memory allocation
 xin = zeros(N+1,length(x));   % memory allocation
 xderi = zeros(N+1,length(x));   % memory allocation
-sims = 100;                     % number of simulations
+sims = 150;                     % number of simulations
 p_ref = zeros(N+1,1);
 delta_cont = zeros(N+1,1);
 
@@ -130,8 +130,8 @@ net.performFcn = 'mse';%help nnperformance to see list of options
 net.trainParam.min_grad = 1e-11;
 
 % datatr = [xin(9-dim); u, v, r, x, y, psi, p; phi; delta, U, psi_ref; cont_out; xdot(9-dim)];
-in = {[data(1:9,1:200000); data(21,1:200000)]};
-out = {data(22:end,1:200000)};
+in = {[data(1:9,1:250000); data(21,1:250000)]};
+out = {data(22:end,1:250000)};
 in_test = {[data(1:9,end-10000:end); data(21,end-10000:end)]};
 out_test = {data(22:end,end-10000:end)};
 
